@@ -1,0 +1,30 @@
+[package]
+name = "scintilla-desktop-daemon"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.90"
+description = "Lock generation probe for scintilla-run/scintilla-desktop-daemon#4"
+license = "MIT"
+publish = false
+
+[dependencies]
+anyhow = "1"
+axum = { version = "0.8", features = ["json", "macros"] }
+flags2env = { git = "https://github.com/ORESoftware/flags-2-env.git", rev = "5a44d6a38f06c2765e80676618fd72bf4e59b984" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tempfile = "3"
+serde_yaml = "0.9"
+sha2 = "0.10"
+hex = "0.4"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+uuid = { version = "1", features = ["v4"] }
+
+[target.'cfg(unix)'.dependencies]
+nix = { version = "0.29", features = ["signal", "process"] }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = ["Win32_System_Power"] }
