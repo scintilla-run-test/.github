@@ -1,25 +1,4 @@
-# Organization agent policy
-
-These instructions apply to automation and coding agents working in `scintilla-run-test` repositories unless a repository defines stricter local policy.
-
-## Durable engineering policy
-
-- This repository defines public organization-wide defaults for `scintilla-run-test`.
-- Never commit credentials, private keys, access tokens, customer data, or private-repository inventories.
-- Resolve Git conflicts semantically: inspect both sides, the merge base, nearby tests and contracts, and normally 3–10 relevant prior commits. Never blindly select all of `ours` or all of `theirs`.
-- Prefer focused pull requests, explicit validation, non-destructive Git operations, and documented tradeoffs.
-- Cross-repository integration uses versioned interfaces, APIs, SDKs, events, or explicitly owned replicated read models. Services do not reach into another service's database by default.
-- `*-infra` repositories and `*-monorepo` application source remain separate. A `*-infra` repository must never appear as a Git submodule under `*-monorepo/apps`.
-- Git submodules are reserved for explicitly coordinated editable source composition. Zed packages or immutable artifacts are preferred for package dependencies. Production deploys immutable artifacts or OCI digests, not source clones.
-
-## Required workflow
-
-1. Read repository-local instructions and relevant contracts before editing.
-2. Inspect affected tests and 3–10 relevant commits when history is material.
-3. Keep changes scoped and do not overwrite stronger local policy.
-4. Run the most relevant formatter, linter, tests, and secret scan available.
-5. Report exactly what changed, what was validated, and remaining uncertainty.
-
+# Organization-wide agent instructions
 
 <!-- ore-org-baseline:begin -->
 These instructions apply to this repository. Repository-local instructions may add stricter requirements, but they must not weaken this baseline.
@@ -85,3 +64,34 @@ Never print, log, commit, paste into issues, include in fixtures, or expose toke
 
 Use focused branches and pull requests. Link the relevant Linear issue or project. Explain behavior, risks, migration and roll-forward considerations, security impact, tests run, conflicts and their semantic resolution, and cross-repository dependencies. Never report a branch, commit, pull request, merge, deployment, test run, or external update as complete without authoritative remote evidence.
 <!-- ore-org-baseline:end -->
+
+## Git and history policy
+
+Prefer merges over rewrites. The rule is: avoid git rebase in favor of git merge.
+A merge records what actually happened, and the automation across this fleet reads
+history to decide what has already landed — rewriting that history makes the
+judgement wrong, and it makes two checkouts of the same work look unrelated.
+
+On any conflict, resolve it semantically. Read at least 3–10 relevant commits of
+surrounding history on both sides before deciding, then merge the two intents.
+Picking a side is not a resolution; it silently discards whichever half was
+dropped, and the loss is invisible afterwards because the conflict marker is gone.
+
+The commands below destroy work that no remote has ever seen, so an agent does not
+run them without explicit human permission:
+
+- `git stash` — stashes live in no remote and appear in neither `git status` nor
+  ahead/behind counts, so a repository holding thousands of stashed lines reports a
+  clean tree to every tool that scans for unlanded work. Use a `wip/<what-it-is>`
+  branch instead. If you find someone else's stash, make it reachable with
+  `git branch rescue/<id> refs/stash` — never pop it.
+- `git reset` — moves the branch out from under committed work.
+- `git clean` — deletes untracked files that have never been pushed anywhere.
+- `git filter-repo` — rewrites every commit id in the repository, which breaks
+  every pin, submodule pointer and open pull request that referenced the old ones.
+
+Stage explicit paths. Never `git add -A`: most checkouts here carry someone else's
+work in progress, and `-A` is how that — plus secrets — gets committed by accident.
+
+Never report work as landed while it is only on local disk. A change is done when
+it is committed, pushed, and open as a pull request; compiling is not landing.
