@@ -1,9 +1,10 @@
 name: public Scintilla desktop app Cargo lock generator
 
 on:
-  push:
-    branches:
-      - audit/scintilla-desktop-app-lock-20260929
+  pull_request:
+    paths:
+      - "fixtures/scintilla-desktop-app-lock/**"
+      - ".github/workflows/public-scintilla-desktop-app-lock.yml"
   workflow_dispatch:
 
 permissions:
